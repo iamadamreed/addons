@@ -1,5 +1,5 @@
 ---
-version: 8.4.0+tcl-patch.1
+version: 8.4.0-tclpatch.1
 slug: matter_server
 name: Matter Server
 description: Matter WebSocket Server for Home Assistant Matter support.
@@ -16,7 +16,6 @@ homeassistant: 2024.6.0
 host_ipc: false
 host_network: true
 host_dbus: true
-image: homeassistant/{arch}-addon-matter-server
 ingress: true
 ingress_port: 5580
 init: false
