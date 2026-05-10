@@ -54,21 +54,45 @@ if [[ "${use_js_server}" == "true" ]]; then
 
   # ---------------------------------------------------------------------------
   # FORK PATCH: overlay TCL custom-clusters from matter-js/matterjs-server PR #630.
-  # The compiled tcl.js is shipped inside this addon image at /opt/tcl-patch/.
-  # We copy it next to the other cluster decoders and append a re-export line
-  # to the bundled custom-clusters index.js (idempotent across restarts).
-  # Drop this block once the upstream PR ships in a matter-server release.
   # ---------------------------------------------------------------------------
+  bashio::log.info "FORK: probing custom-clusters layout..."
+  bashio::log.info "FORK: ls /opt/matterjs/node_modules/@matter-server/ ="
+  ls /opt/matterjs/node_modules/@matter-server/ 2>&1 | while read -r f; do
+    bashio::log.info "FORK:   ${f}"
+  done
+
+  cc_pkg="/opt/matterjs/node_modules/@matter-server/custom-clusters"
+  if [[ -d "${cc_pkg}" ]]; then
+    bashio::log.info "FORK: ls ${cc_pkg} ="
+    find "${cc_pkg}" -maxdepth 3 -type f 2>&1 | head -25 | while read -r f; do
+      bashio::log.info "FORK:   ${f}"
+    done
+  fi
+
   cc_dist="/opt/matterjs/node_modules/@matter-server/custom-clusters/dist/esm/clusters"
   if [[ -d "${cc_dist}" && -f /opt/tcl-patch/tcl.js ]]; then
-    cp /opt/tcl-patch/tcl.js "${cc_dist}/"
+    bashio::log.info "FORK: copying tcl.js -> ${cc_dist}/"
+    cp -v /opt/tcl-patch/tcl.js "${cc_dist}/" 2>&1 | while read -r f; do
+      bashio::log.info "FORK:   ${f}"
+    done
     cp /opt/tcl-patch/tcl.js.map "${cc_dist}/" 2>/dev/null || true
+    bashio::log.info "FORK: index.js BEFORE patch ="
+    cat "${cc_dist}/index.js" | while read -r f; do
+      bashio::log.info "FORK:   ${f}"
+    done
     if ! grep -q 'tcl.js' "${cc_dist}/index.js"; then
       echo 'export * from "./tcl.js";' >> "${cc_dist}/index.js"
+      bashio::log.info "FORK: appended export"
+    else
+      bashio::log.info "FORK: tcl.js export already present (idempotent)"
     fi
-    bashio::log.info "FORK: TCL cluster decoder installed (vendor 0x1334) — vendor-cluster writes enabled"
+    bashio::log.info "FORK: index.js AFTER patch ="
+    cat "${cc_dist}/index.js" | while read -r f; do
+      bashio::log.info "FORK:   ${f}"
+    done
+    bashio::log.info "FORK: TCL cluster decoder installed (vendor 0x1334)"
   else
-    bashio::log.warning "FORK: cannot apply TCL cluster overlay (cc_dist=${cc_dist})"
+    bashio::log.warning "FORK: cannot apply TCL cluster overlay (cc_dist exists=$([[ -d "${cc_dist}" ]] && echo yes || echo no), tcl.js exists=$([[ -f /opt/tcl-patch/tcl.js ]] && echo yes || echo no))"
   fi
   # ---------------------------------------------------------------------------
 
