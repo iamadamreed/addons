@@ -51,6 +51,27 @@ if [[ "${use_js_server}" == "true" ]]; then
     bashio::log.error "Failed to install Matter Server from npm. Aborting startup."
     exit 1
   fi
+
+  # ---------------------------------------------------------------------------
+  # FORK PATCH: overlay TCL custom-clusters from matter-js/matterjs-server PR #630.
+  # The compiled tcl.js is shipped inside this addon image at /opt/tcl-patch/.
+  # We copy it next to the other cluster decoders and append a re-export line
+  # to the bundled custom-clusters index.js (idempotent across restarts).
+  # Drop this block once the upstream PR ships in a matter-server release.
+  # ---------------------------------------------------------------------------
+  cc_dist="/opt/matterjs/node_modules/@matter-server/custom-clusters/dist/esm/clusters"
+  if [[ -d "${cc_dist}" && -f /opt/tcl-patch/tcl.js ]]; then
+    cp /opt/tcl-patch/tcl.js "${cc_dist}/"
+    cp /opt/tcl-patch/tcl.js.map "${cc_dist}/" 2>/dev/null || true
+    if ! grep -q 'tcl.js' "${cc_dist}/index.js"; then
+      echo 'export * from "./tcl.js";' >> "${cc_dist}/index.js"
+    fi
+    bashio::log.info "FORK: TCL cluster decoder installed (vendor 0x1334) — vendor-cluster writes enabled"
+  else
+    bashio::log.warning "FORK: cannot apply TCL cluster overlay (cc_dist=${cc_dist})"
+  fi
+  # ---------------------------------------------------------------------------
+
   # Clean up to save disk space
   npm cache clean --force
   find ./node_modules -type d -name "cjs" -path "*/@matter/*" -exec rm -rf {} + 2>/dev/null || true
