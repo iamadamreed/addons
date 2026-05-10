@@ -4,7 +4,7 @@ This is a fork of [`home-assistant/addons`](https://github.com/home-assistant/ad
 
 ## Why this fork exists
 
-TCL ships several smart-home devices (e.g. the **H50D44W** dehumidifier) as Matter-over-Wi-Fi but registers them with the CSA as a generic **Fan** device type (`0x002B`). The dehumidifier-specific data — target humidity, current humidity, mode, bucket-full — lives in TCL's vendor-specific Matter clusters (`0x1334FC00`, `0x1334FC03`) that no Matter ecosystem decodes by default. Without a registered TLV schema, `write_attribute` on those vendor attributes silently no-ops, so HA's Matter integration cannot control these devices end-to-end.
+TCL ships several smart-home devices (e.g. the **H50D44W** dehumidifier) as Matter-over-Wi-Fi but registers them with the CSA as a generic **Fan** device type (`0x002B`). The dehumidifier-specific data — target humidity, current humidity, mode, bucket-full — lives in TCL's vendor-specific Matter cluster `0x1334FC03` that no Matter ecosystem decodes by default. Without a registered TLV schema, `write_attribute` on those vendor attributes silently no-ops, so HA's Matter integration cannot control these devices end-to-end.
 
 The proper upstream fix is to add the TCL cluster decoder to matter.js itself. That's filed as:
 
@@ -16,8 +16,8 @@ Once PR #630 merges and a new matter-server release ships into the official Matt
 
 The patch lives entirely inside the `matter_server` add-on:
 
-- `matter_server/config.yaml` — version bumped to `8.4.0-tclpatch.4`; `image:` line removed so the add-on builds locally instead of pulling the official prebuilt image.
-- `matter_server/rootfs/opt/tcl-patch/tcl.ts` — TypeScript source for `TclDehumidifierCluster` (`0x1334FC03`) and `TclPrivateCluster` (`0x1334FC00`). Mirrors the file proposed in PR #630.
+- `matter_server/config.yaml` — version bumped to `8.4.0-tclpatch.5`; `image:` line removed so the add-on builds locally instead of pulling the official prebuilt image.
+- `matter_server/rootfs/opt/tcl-patch/tcl.ts` — TypeScript source for `TclDehumidifierCluster` (`0x1334FC03`). Kept byte-for-byte identical to the file proposed in PR #630.
 - `matter_server/rootfs/etc/s6-overlay/s6-rc.d/matter-server/run` — adds a build step before the matter-server starts: copies `tcl.ts` into the addon's `@matter-server/custom-clusters` package, runs `esbuild --target=es2022` against the addon's matter.js to produce `tcl.js`, then appends an `export * from "./tcl.js"` to the package's `index.js` so the cluster is discovered at startup.
 
 Everything else is upstream.

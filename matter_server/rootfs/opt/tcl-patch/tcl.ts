@@ -4,29 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { attribute, bool, cluster, string, uint8, writable } from "@matter/main/model";
+import { attribute, bool, cluster, enum8, string, uint8, writable } from "@matter/main/model";
+
+/**
+ * Operating modes for {@link TclDehumidifierCluster.mode}. Integer values
+ * 0..4 are observed on H50D44W firmware 1.0; the symbolic names follow the
+ * order shown in the TCL Home mobile app.
+ *
+ * Declared as a `const enum` so the wire encoding stays a plain 8-bit value
+ * and the symbolic mapping is captured alongside the cluster.
+ */
+const enum TclMode {
+    Set = 0,
+    Continue = 1,
+    Comfort = 2,
+    Smart = 3,
+    Dry = 4,
+}
 
 /**
  * TCL primary control/state cluster — Vendor ID 0x1334 (TCL).
  *
- * Found on TCL Matter dehumidifiers (e.g. H50D44W, H50D66KW).
- * The CSA-registered device type is Fan (0x002B), but the dehumidifier-specific
- * controls — target humidity, mode, bucket-full status — are exposed through
- * this vendor cluster.
+ * Found on TCL Matter dehumidifiers (e.g. H50D44W, H50D66KW). The CSA-registered
+ * device type is Fan (0x002B), so the dehumidifier-specific controls are
+ * exposed through this vendor cluster.
  *
- * Attribute IDs are local (0x00–0x06); the cluster decorator carries the
- * vendor prefix.
- *
- * Mapping verified empirically against an H50D44W on firmware 1.0:
- * - Mode integer values are observed; the symbolic mapping (Set / Continue /
- *   Comfort / Smart / Dry) follows the order shown in the TCL Home app and
- *   is the consumer's responsibility to translate.
+ * Attribute IDs are local (0x00–0x06); the cluster decorator carries the vendor
+ * prefix. Datatypes verified empirically against an H50D44W on firmware 1.0.
  */
 @cluster(0x1334fc03)
 export class TclDehumidifierCluster {
-    /** Operating mode — 0=Set, 1=Continue, 2=Comfort, 3=Smart, 4=Dry. */
-    @attribute(0x0000, uint8, writable)
-    mode?: number;
+    /** Operating mode — see {@link TclMode} for the value mapping. */
+    @attribute(0x0000, enum8, writable)
+    mode?: TclMode;
 
     /** Target humidity setpoint in percent (typically 35..85). */
     @attribute(0x0001, uint8, writable)
@@ -40,29 +50,25 @@ export class TclDehumidifierCluster {
     @attribute(0x0003, bool)
     waterBucketFull?: boolean;
 
-    /** Filter / child-lock alert (semantics device-specific). */
+    /** Filter-replacement / child-lock alert (semantics device-specific). */
     @attribute(0x0004, bool)
     filterAlert?: boolean;
 
-    /** Active error codes as a JSON-encoded list, e.g. "[]" or "[3]". */
+    /**
+     * Active error codes. The device emits a literal JSON-encoded string here
+     * (e.g. `"[]"` or `"[3]"`), not a Matter list TLV — confirmed by reads on
+     * H50D44W firmware 1.0. Treating the attribute as a string preserves what
+     * the device actually puts on the wire; consumers JSON-parse it if they
+     * want a numeric list.
+     */
     @attribute(0x0005, string)
     errorCodes?: string;
 
-    /** Supported feature set as a JSON-encoded list, e.g. "[3]". */
+    /**
+     * Device feature set. Same wire format as {@link errorCodes} — a JSON-
+     * encoded string, e.g. `"[3]"` (verified on H50D44W). Static across the
+     * device's lifetime in observed captures.
+     */
     @attribute(0x0006, string)
     featureSet?: string;
-}
-
-/**
- * TCL private/identification cluster — Vendor ID 0x1334.
- *
- * Holds an opaque vendor-prefixed string attribute that is populated by
- * the TCL Home app at first commissioning. Empty on devices commissioned
- * directly without going through TCL Home.
- */
-@cluster(0x1334fc00)
-export class TclPrivateCluster {
-    /** Opaque vendor blob. May be empty. */
-    @attribute(0xe000, string)
-    opaque?: string;
 }

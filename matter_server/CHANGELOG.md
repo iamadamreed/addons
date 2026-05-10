@@ -1,8 +1,12 @@
 # Changelog
 
+## 8.4.0-tclpatch.5 (iamadamreed fork)
+
+- Sync bundled `tcl.ts` with PR #630 head `d7a3632` after maintainer review: `mode` is now `enum8` with a `TclMode { Set, Continue, Comfort, Smart, Dry }` mapping; the speculative `TclPrivateCluster` (`0x1334FC00`) was dropped.
+
 ## 8.4.0-tclpatch.4 (iamadamreed fork)
 
-- Build and register TCL vendor clusters (`0x1334FC00` / `0x1334FC03`) in the addon's matter.js at startup, so vendor-cluster `read_attribute` / `write_attribute` calls actually work for TCL dehumidifiers (e.g. **H50D44W**, **H50D66KW**).
+- Build and register the TCL vendor cluster `0x1334FC03` in the addon's matter.js at startup, so vendor-cluster `read_attribute` / `write_attribute` calls actually work for TCL dehumidifiers (e.g. **H50D44W**, **H50D66KW**).
 - Source: ports the cluster decoder from [matter-js/matterjs-server PR #630](https://github.com/matter-js/matterjs-server/pull/630). Once that PR merges and rolls into a stock matter-server release, this fork becomes redundant — switch back to `home-assistant/addons`.
 - Consumer: [iamadamreed/ha-tcl-matter](https://github.com/iamadamreed/ha-tcl-matter) surfaces humidifier / sensor / binary_sensor / select entities for TCL Matter dehumidifiers.
 
