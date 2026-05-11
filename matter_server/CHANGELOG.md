@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.4.0-tclpatch.6 (iamadamreed fork)
+
+- Sync bundled `tcl.ts` with PR #630 head `ce78ac9`: errorCodes JSDoc now documents the empirically verified meaning of code 5 (water bucket full on H50D44W), captured by cycling the bucket and watching only `errorCodes` change. Downstream `iamadamreed/ha-tcl-matter@v0.4.2` now reads this code to drive the bucket-full binary sensor.
+
 ## 8.4.0-tclpatch.5 (iamadamreed fork)
 
 - Sync bundled `tcl.ts` with PR #630 head `d7a3632` after maintainer review: `mode` is now `enum8` with a `TclMode { Set, Continue, Comfort, Smart, Dry }` mapping; the speculative `TclPrivateCluster` (`0x1334FC00`) was dropped.

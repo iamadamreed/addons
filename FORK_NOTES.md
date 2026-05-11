@@ -16,7 +16,7 @@ Once PR #630 merges and a new matter-server release ships into the official Matt
 
 The patch lives entirely inside the `matter_server` add-on:
 
-- `matter_server/config.yaml` — version bumped to `8.4.0-tclpatch.5`; `image:` line removed so the add-on builds locally instead of pulling the official prebuilt image.
+- `matter_server/config.yaml` — version bumped to `8.4.0-tclpatch.6`; `image:` line removed so the add-on builds locally instead of pulling the official prebuilt image.
 - `matter_server/rootfs/opt/tcl-patch/tcl.ts` — TypeScript source for `TclDehumidifierCluster` (`0x1334FC03`). Kept byte-for-byte identical to the file proposed in PR #630.
 - `matter_server/rootfs/etc/s6-overlay/s6-rc.d/matter-server/run` — adds a build step before the matter-server starts: copies `tcl.ts` into the addon's `@matter-server/custom-clusters` package, runs `esbuild --target=es2022` against the addon's matter.js to produce `tcl.js`, then appends an `export * from "./tcl.js"` to the package's `index.js` so the cluster is discovered at startup.
 
