@@ -8,9 +8,9 @@ TCL ships several smart-home devices (e.g. the **H50D44W** dehumidifier) as Matt
 
 The proper upstream fix is to add the TCL cluster decoder to matter.js itself. That's filed as:
 
-> **[matter-js/matterjs-server PR #630 — `custom-clusters: add TCL vendor cluster (VID 0x1334)`](https://github.com/matter-js/matterjs-server/pull/630)**
+> **[matter-js/matterjs-server PR #630 — `custom-clusters: add TCL vendor cluster (VID 0x1334)`](https://github.com/matter-js/matterjs-server/pull/630)** — ✅ **merged 2026-05-12** into `main` as `a60d524`.
 
-Once PR #630 merges and a new matter-server release ships into the official Matter Server add-on image, **this fork becomes redundant**. Switch back to `home-assistant/addons` at that point.
+Now waiting on a `matter-server` release that includes the merged cluster to roll into the official Matter Server add-on image. Latest stable was `0.6.8` (pre-merge); the next release (`0.6.9` or a fresh nightly) will carry the decoder. Once that ships and the official add-on rebuilds, **this fork becomes redundant** — switch back to `home-assistant/addons`.
 
 ## What changed vs upstream
 

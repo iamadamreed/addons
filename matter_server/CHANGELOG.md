@@ -3,6 +3,7 @@
 ## 8.4.0-tclpatch.6 (iamadamreed fork)
 
 - Sync bundled `tcl.ts` with PR #630 head `ce78ac9`: errorCodes JSDoc now documents the empirically verified meaning of code 5 (water bucket full on H50D44W), captured by cycling the bucket and watching only `errorCodes` change. Downstream `iamadamreed/ha-tcl-matter@v0.4.2` now reads this code to drive the bucket-full binary sensor.
+- **Upstream status:** PR #630 was [merged 2026-05-12](https://github.com/matter-js/matterjs-server/pull/630) into `matter-js/matterjs-server@main` (`a60d524`). Once a `matter-server` release ships including the merged decoder, this fork becomes redundant — switch back to `home-assistant/addons`.
 
 ## 8.4.0-tclpatch.5 (iamadamreed fork)
 
